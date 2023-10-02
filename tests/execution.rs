@@ -2209,6 +2209,26 @@ fn test_relative_call() {
 }
 
 #[test]
+#[should_panic(
+    expected = r#"called `Result::unwrap()` on an `Err` value: ElfError(FailedToParse("Section/symbol name size `.bss.__rust_no_a` longer than `16` bytes."))"#
+)]
+fn test_long_section_name() {
+    test_interpreter_and_jit_elf!(
+        "tests/elfs/long_section_name.so",
+        [1],
+        (),
+        TestContextObject::new(18),
+        ProgramResult::Err(EbpfError::ElfError(
+            solana_rbpf::elf_parser::ElfParserError::InvalidStringTooLong(
+                ".bss.__rust_no_a".to_string(),
+                solana_rbpf::elf_parser::SECTION_NAME_LENGTH_MAXIMUM
+            )
+            .into()
+        )),
+    );
+}
+
+#[test]
 fn test_bpf_to_bpf_scratch_registers() {
     test_interpreter_and_jit_asm!(
         "
