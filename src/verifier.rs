@@ -27,6 +27,7 @@ use crate::{
     ebpf,
     program::{FunctionRegistry, SBPFVersion},
     vm::Config,
+    btf::btf,
 };
 use thiserror::Error;
 

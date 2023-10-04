@@ -23,10 +23,14 @@ extern crate hash32;
 extern crate log;
 extern crate rand;
 extern crate thiserror;
+extern crate alloc;
+#[cfg(feature = "std")]
+extern crate std;
 
 pub mod aligned_memory;
 mod asm_parser;
 pub mod assembler;
+pub mod btf;
 #[cfg(feature = "debugger")]
 pub mod debugger;
 pub mod disassembler;

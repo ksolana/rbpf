@@ -25,7 +25,12 @@ combine = "3.8.1"
 gdbstub = { version = "0.6.2", optional = true }
 goblin = "0.5.1"
 hash32 = "0.2.0"
+hashbrown = { default-features = true }
 log = "0.4.2"
+object = { default-features = false, features = [
+    "elf",
+    "read_core",
+] }
 rand = { version = "0.8.5", features = ["small_rng"]}
 rustc-demangle = "0.1"
 scroll = "0.11"
