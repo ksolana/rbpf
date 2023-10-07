@@ -9,21 +9,24 @@ use core::{ffi::CStr, mem, ptr};
 
 //use bytes::BufMut;
 use log::debug;
-//use object::{Endianness, SectionIndex};
+//use crate::btf::generated::{btf_ext_header, btf_header};
+
+use object::{Endianness, SectionIndex};
 
 //#[cfg(not(feature = "std"))]
 //use crate::std;
-/*use crate::{
-    btf::{
-        info::{FuncSecInfo, LineSecInfo},
-        relocation::Relocation,
-        Array, BtfEnum, BtfKind, BtfMember, BtfType, Const, Enum, FuncInfo, FuncLinkage, Int,
-        IntEncoding, LineInfo, Struct, Typedef, Union, VarLinkage,
+
+use crate::{
+    btf::types::{
+        //info::{FuncSecInfo, LineSecInfo},
+        //relocation::Relocation,
+        Array, BtfEnum, BtfKind, BtfMember, BtfType, Const, Enum, /*FuncInfo,*/ FuncLinkage, Int,
+        IntEncoding, /*LineInfo,*/ Struct, Typedef, Union, VarLinkage,
     },
-    generated::{btf_ext_header, btf_header},
-    util::{bytes_of, HashMap},
-    Object,
-};*/
+    btf::generated::{btf_ext_header, btf_header},
+    btf::util::{bytes_of, HashMap},
+    //Object,
+};
 
 pub(crate) const MAX_RESOLVE_DEPTH: u8 = 32;
 pub(crate) const MAX_SPEC_LEN: usize = 64;
@@ -158,7 +161,7 @@ pub enum BtfError {
     #[error("Unable to get symbol name")]
     InvalidSymbolName,
 }
-/*
+
 /// Available BTF features
 #[derive(Default, Debug)]
 #[allow(missing_docs)]
@@ -270,7 +273,8 @@ impl Btf {
             _endianness: Endianness::default(),
         }
     }
-
+}
+/*
     pub(crate) fn is_empty(&self) -> bool {
         // the first one is awlays BtfType::Unknown
         self.types.types.len() < 2
@@ -1013,7 +1017,7 @@ impl<'a> Iterator for SecInfoIter<'a> {
             data,
         })
     }
-}
+}*/
 
 /// BtfTypes allows for access and manipulation of a
 /// collection of BtfType objects
@@ -1090,7 +1094,7 @@ impl BtfTypes {
         })
     }
 }
-
+/*
 #[derive(Debug)]
 pub(crate) struct SecInfo<'a> {
     name_offset: u32,
