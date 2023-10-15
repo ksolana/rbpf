@@ -27,7 +27,7 @@ use crate::{
     ebpf,
     program::{FunctionRegistry, SBPFVersion},
     vm::Config,
-    btf::btf,
+    btf::btf::*,
 };
 use thiserror::Error;
 
@@ -99,6 +99,14 @@ pub trait Verifier {
     ///   - Unknown eBPF syscall index.
     fn verify(
         prog: &[u8],
+        config: &Config,
+        sbpf_version: &SBPFVersion,
+        function_registry: &FunctionRegistry<usize>,
+    ) -> Result<(), VerifierError>;
+
+    fn verify_1(
+        prog: &[u8],
+        btf: Btf,
         config: &Config,
         sbpf_version: &SBPFVersion,
         function_registry: &FunctionRegistry<usize>,
@@ -229,8 +237,18 @@ impl Verifier for RequisiteVerifier {
     /// Check the program against the verifier's rules
     #[rustfmt::skip]
     fn verify(prog: &[u8], config: &Config, sbpf_version: &SBPFVersion, function_registry: &FunctionRegistry<usize>) -> Result<(), VerifierError> {
+        Ok(())
+    }
+
+    fn verify_1(prog: &[u8], btf: Btf, config: &Config, sbpf_version: &SBPFVersion, function_registry: &FunctionRegistry<usize>) -> Result<(), VerifierError> {
         check_prog_len(prog)?;
 
+        // use the `BtfTypes::resolve_type` to get type from a type_id.
+        // you can assume that you'll get the type id of the function prototype of the function you're verifying
+        // Look at FuncProto and BTF_KIND_FUNC_PROTO, add a function that returns type_id based on a FuncProto.
+        // if you want to get it now while testing, you need to iterate over all the btf types, and look for a func proto that matches the name of the function you're verifying
+        // https://github.com/aya-rs/aya/blob/373fb7bf06ba80ee4c120d8c112f5e810204c472/aya-obj/src/btf/btf.rs#L279
+        // hash<fn, type_id>
         let program_range = 0..prog.len() / ebpf::INSN_SIZE;
         let mut function_iter = function_registry.keys().map(|insn_ptr| insn_ptr as usize).peekable();
         let mut function_range = program_range.start..program_range.end;
@@ -251,6 +269,7 @@ impl Verifier for RequisiteVerifier {
                 }
             }
 
+            let btf_type = btf.get_btftype(&insn);
             match insn.opc {
                 ebpf::LD_DW_IMM if !sbpf_version.disable_lddw() => {
                     check_load_dw(prog, insn_ptr)?;

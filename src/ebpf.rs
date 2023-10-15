@@ -548,6 +548,11 @@ impl Insn {
     pub fn to_vec(&self) -> Vec<u8> {
         self.to_array().to_vec()
     }
+    /// Three least significant bits of an instruction's opcode
+    /// determins it's class.
+    pub fn insn_class(&self) -> u8 {
+        self.opc & 0x07
+    }
 }
 
 /// Get the instruction at `idx` of an eBPF program. `idx` is the index (number) of the

@@ -25,6 +25,7 @@ use crate::{
     },
     btf::generated::{btf_ext_header, btf_header},
     btf::util::{bytes_of, HashMap},
+    ebpf::Insn,
     //Object,
 };
 
@@ -273,8 +274,7 @@ impl Btf {
             _endianness: Endianness::default(),
         }
     }
-}
-/*
+
     pub(crate) fn is_empty(&self) -> bool {
         // the first one is awlays BtfType::Unknown
         self.types.types.len() < 2
@@ -284,6 +284,26 @@ impl Btf {
         self.types.types.iter()
     }
 
+    pub(crate) fn type_id_by_offset(&self, i: &Insn) -> u32 {
+        // FIXME: Assuming Insn.pc is the offset, use that to get line_info and type_info
+        let pc = i.ptr; // Offset = pc + slide ()
+        return pc as u32;
+    }
+
+    pub(crate) fn type_by_id(&self, type_id: u32) -> Result<&BtfType, BtfError> {
+        // This function is also defined below but commented for now.
+        self.types.type_by_id(type_id)
+    }
+
+    pub(crate) fn get_btftype(&self, i: &Insn) -> Result<&BtfType, BtfError> {
+        // Get btftype based on instruction's type_id.
+        // If type_id is not present then either abort, or try using insn_class.
+        let type_id = self.type_id_by_offset(i);
+        self.type_by_id(type_id)
+    }
+}
+
+/*
     /// Adds a string to BTF metadata, returning an offset
     pub fn add_string(&mut self, name: &str) -> u32 {
         let str = name.bytes().chain(std::iter::once(0));
