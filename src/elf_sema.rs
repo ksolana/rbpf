@@ -21,6 +21,9 @@
 use crate::{
     ebpf,
     btf::{btf::*, types::BtfType},
+    program::{FunctionRegistry, SBPFVersion},
+    verifier::VerifierError,
+    vm::Config,
 };
 
 use alloc::{
@@ -50,5 +53,29 @@ impl Sema {
             fn_symbol_table,
             insn_symbol_table
         }
+    }
+    /// Build symbol table of prog.
+    pub fn build_symtab(prog: &[u8], sbpf_version: &SBPFVersion, function_registry: &FunctionRegistry<usize>) -> Result<(), VerifierError>{
+        let program_range = 0..prog.len() / ebpf::INSN_SIZE;
+        let mut function_iter = function_registry.keys().map(|insn_ptr| insn_ptr as usize).peekable();
+        let mut function_range = program_range.start..program_range.end;
+        let mut insn_ptr: usize = 0;
+        while (insn_ptr + 1) * ebpf::INSN_SIZE <= prog.len() {
+            let insn = ebpf::get_insn(prog, insn_ptr);
+            let mut store = false;
+
+            if sbpf_version.static_syscalls() && function_iter.peek() == Some(&insn_ptr) {
+                function_range.start = function_iter.next().unwrap_or(0);
+                function_range.end = *function_iter.peek().unwrap_or(&program_range.end);
+                let end_insn = ebpf::get_insn(prog, function_range.end.saturating_sub(1));
+                match end_insn.opc {
+                    ebpf::JA | ebpf::EXIT => {},
+                    _ =>  return Err(VerifierError::InvalidFunction(
+                        function_range.end.saturating_sub(1),
+                    )),
+                }
+            }
+        }
+        Ok(())
     }
 }
