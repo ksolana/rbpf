@@ -28,6 +28,7 @@ use crate::{
     program::{FunctionRegistry, SBPFVersion},
     vm::Config,
     btf::btf::*,
+    elf_sema,
 };
 use thiserror::Error;
 
@@ -250,6 +251,9 @@ impl Verifier for RequisiteVerifier {
         // https://github.com/aya-rs/aya/blob/373fb7bf06ba80ee4c120d8c112f5e810204c472/aya-obj/src/btf/btf.rs#L279
         // hash<fn, type_id>
         let program_range = 0..prog.len() / ebpf::INSN_SIZE;
+        // Fucntion registry has list of function start and end.
+        // key (int) -> name of the function. in BTF we can retried type from the name of the function.
+        // TODO: Build a table (function name -> btf type) as line-info may not be present.
         let mut function_iter = function_registry.keys().map(|insn_ptr| insn_ptr as usize).peekable();
         let mut function_range = program_range.start..program_range.end;
         let mut insn_ptr: usize = 0;
@@ -257,7 +261,7 @@ impl Verifier for RequisiteVerifier {
             let insn = ebpf::get_insn(prog, insn_ptr);
             let mut store = false;
 
-            if sbpf_version.static_syscalls() && function_iter.peek() == Some(&insn_ptr) {
+            if sbpf_version.static_syscalls() && function_iter.peek() == Some(&insn_ptr) { // reached beginning of another functoin. BTF will be present and it will have the info about number of args.
                 function_range.start = function_iter.next().unwrap_or(0);
                 function_range.end = *function_iter.peek().unwrap_or(&program_range.end);
                 let insn = ebpf::get_insn(prog, function_range.end.saturating_sub(1));
@@ -269,7 +273,12 @@ impl Verifier for RequisiteVerifier {
                 }
             }
 
-            let btf_type = btf.get_btftype(&insn);
+            // the first function_range.start is the start of function. this will have entry in btf.
+            // the argumenet types will also have entry in btf.
+            // at the end r0 will have the return value.
+            // Other than this we have to reconstruct the type of everything else.
+            let btf_type = btf.get_btftype(&insn).unwrap();
+
             match insn.opc {
                 ebpf::LD_DW_IMM if !sbpf_version.disable_lddw() => {
                     check_load_dw(prog, insn_ptr)?;

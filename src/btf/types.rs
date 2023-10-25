@@ -10,7 +10,7 @@ use object::Endianness;
 use crate::btf::btf::BtfError;
 use crate::btf::util;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum BtfType {
     Unknown,
     Fwd(Fwd),
@@ -35,7 +35,7 @@ pub enum BtfType {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Fwd {
     pub(crate) name_offset: u32,
     info: u32,
@@ -57,7 +57,7 @@ impl Fwd {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Const {
     pub(crate) name_offset: u32,
     info: u32,
@@ -88,7 +88,7 @@ impl Const {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Volatile {
     pub(crate) name_offset: u32,
     info: u32,
@@ -109,7 +109,7 @@ impl Volatile {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Restrict {
     pub(crate) name_offset: u32,
     _info: u32,
@@ -131,7 +131,7 @@ impl Restrict {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Ptr {
     pub(crate) name_offset: u32,
     info: u32,
@@ -162,7 +162,7 @@ impl Ptr {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Typedef {
     pub(crate) name_offset: u32,
     info: u32,
@@ -193,7 +193,7 @@ impl Typedef {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Float {
     pub(crate) name_offset: u32,
     info: u32,
@@ -223,7 +223,7 @@ impl Float {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Func {
     pub(crate) name_offset: u32,
     info: u32,
@@ -282,7 +282,7 @@ impl Func {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeTag {
     pub(crate) name_offset: u32,
     info: u32,
@@ -335,7 +335,7 @@ impl From<u32> for IntEncoding {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Int {
     pub(crate) name_offset: u32,
     info: u32,
@@ -397,7 +397,7 @@ impl Int {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct BtfEnum {
     pub name_offset: u32,
     pub value: u32,
@@ -410,7 +410,7 @@ impl BtfEnum {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Enum {
     pub(crate) name_offset: u32,
     info: u32,
@@ -476,7 +476,7 @@ impl Enum {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct BtfEnum64 {
     pub(crate) name_offset: u32,
     pub(crate) value_low: u32,
@@ -494,7 +494,7 @@ impl BtfEnum64 {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Enum64 {
     pub(crate) name_offset: u32,
     info: u32,
@@ -568,7 +568,7 @@ impl Enum64 {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct BtfMember {
     pub(crate) name_offset: u32,
     pub(crate) btf_type: u32,
@@ -576,7 +576,7 @@ pub(crate) struct BtfMember {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Struct {
     pub(crate) name_offset: u32,
     info: u32,
@@ -655,7 +655,7 @@ impl Struct {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Union {
     pub(crate) name_offset: u32,
     info: u32,
@@ -733,7 +733,7 @@ impl Union {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct BtfArray {
     pub(crate) element_type: u32,
     pub(crate) index_type: u32,
@@ -741,7 +741,7 @@ pub(crate) struct BtfArray {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Array {
     pub(crate) name_offset: u32,
     info: u32,
@@ -791,14 +791,14 @@ impl Array {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BtfParam {
     pub name_offset: u32,
     pub btf_type: u32,
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct FuncProto {
     pub(crate) name_offset: u32,
     info: u32,
@@ -872,7 +872,7 @@ impl From<u32> for VarLinkage {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Var {
     pub(crate) name_offset: u32,
     info: u32,
@@ -917,7 +917,7 @@ impl Var {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DataSecEntry {
     pub btf_type: u32,
     pub offset: u32,
@@ -925,7 +925,7 @@ pub struct DataSecEntry {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DataSec {
     pub(crate) name_offset: u32,
     info: u32,
@@ -986,7 +986,7 @@ impl DataSec {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DeclTag {
     pub(crate) name_offset: u32,
     info: u32,

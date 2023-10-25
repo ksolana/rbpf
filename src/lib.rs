@@ -31,6 +31,7 @@ pub mod aligned_memory;
 mod asm_parser;
 pub mod assembler;
 pub mod btf;
+pub mod elf_sema;
 #[cfg(feature = "debugger")]
 pub mod debugger;
 pub mod disassembler;

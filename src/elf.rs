@@ -292,6 +292,12 @@ impl<C: ContextObject> Executable<C> {
     }
 
     /// Verify the executable
+    pub fn run_type_inference(&self) -> Result<(), EbpfError> {
+
+        Ok(())
+    }
+
+    /// Verify the executable
     pub fn verify<V: Verifier>(&self) -> Result<(), EbpfError> {
         <V as Verifier>::verify(
             self.get_text_bytes().1,

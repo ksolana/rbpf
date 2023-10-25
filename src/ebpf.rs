@@ -20,6 +20,8 @@
 
 use byteorder::{ByteOrder, LittleEndian};
 use hash32::{Hash, Hasher, Murmur3Hasher};
+use crate::btf::types::BtfType;
+
 use std::fmt;
 
 /// Solana BPF version flag
@@ -479,6 +481,8 @@ pub struct Insn {
     pub off: i16,
     /// Immediate value operand.
     pub imm: i64,
+    // Type obtained from btf
+    //pub btf_type: Option<BtfType>,
 }
 
 impl fmt::Debug for Insn {

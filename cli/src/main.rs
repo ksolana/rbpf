@@ -120,6 +120,7 @@ fn main() {
     }
     .unwrap();
 
+    executable.run_type_inference();
     executable.verify::<RequisiteVerifier>().unwrap();
 
     let mut mem = match matches.value_of("input").unwrap().parse::<usize>() {
