@@ -293,7 +293,7 @@ impl<C: ContextObject> Executable<C> {
 
     /// Verify the executable
     pub fn run_type_inference(&self) -> Result<(), EbpfError> {
-
+        use crate::elf_sema::Sema;
         Ok(())
     }
 
