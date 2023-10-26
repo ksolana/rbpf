@@ -14,7 +14,6 @@
 // hash<fn, type_id>
 //! let program_range = 0..prog.len() / ebpf::INSN_SIZE;
 
-// Fucntion registry has list of function start and end.
 // key (int) -> name of the function. in BTF we can retried type from the name of the function.
 // TODO: Build a table (function name -> btf type) as line-info may not be present.
 
@@ -55,8 +54,13 @@ impl Sema {
         }
     }
     /// Build symbol table of prog.
-    pub fn build_symtab(prog: &[u8], sbpf_version: &SBPFVersion, function_registry: &FunctionRegistry<usize>) -> Result<(), VerifierError>{
+    /// * `prog` - The SBPF program.
+    /// * `sbpf_version` - Version.
+    /// * `function_registry` - List of function start and end.
+    pub fn build_symtab(&mut self, prog: &[u8], btf: Btf, sbpf_version: &SBPFVersion, function_registry: &FunctionRegistry<usize>) -> Result<(), VerifierError> {
         let program_range = 0..prog.len() / ebpf::INSN_SIZE;
+        // TODO: Why iterate over keys, we should just query function_registry for the insn_ptr.
+        // function_iter gets a list of all the function addresses in sorted order.
         let mut function_iter = function_registry.keys().map(|insn_ptr| insn_ptr as usize).peekable();
         let mut function_range = program_range.start..program_range.end;
         let mut insn_ptr: usize = 0;
@@ -64,16 +68,25 @@ impl Sema {
             let insn = ebpf::get_insn(prog, insn_ptr);
             let mut store = false;
 
+            // An insn_ptr points to the end of a function when it has value in function_iter.
             if sbpf_version.static_syscalls() && function_iter.peek() == Some(&insn_ptr) {
+                // function_range contains the current function start and end pointers.
                 function_range.start = function_iter.next().unwrap_or(0);
                 function_range.end = *function_iter.peek().unwrap_or(&program_range.end);
                 let end_insn = ebpf::get_insn(prog, function_range.end.saturating_sub(1));
-                match end_insn.opc {
+                match end_insn.opc { // function_end must have a `ja` or `exit`.
                     ebpf::JA | ebpf::EXIT => {},
                     _ =>  return Err(VerifierError::InvalidFunction(
                         function_range.end.saturating_sub(1),
                     )),
                 }
+                // Entry of the function will have a BtfType in BTF section.
+                // e.g., [1] FUNC_PROTO '(anon)' ret_type_id=2 vlen=1 '(anon)' type_id=2
+                let fentry_btf_type = btf.get_btftype(&insn).unwrap();
+                // Last instruction in the function has the return type.
+                let fexit_btf_type = btf.get_btftype(&end_insn).unwrap();
+                let insn_ptr_val = insn_ptr as u32;
+                self.fn_symbol_table.insert(function_registry.map.get(&insn_ptr_val).unwrap().1.to_string(), fentry_btf_type.clone());
             }
         }
         Ok(())
