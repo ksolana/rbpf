@@ -76,11 +76,12 @@ impl Sema {
                 // function_range contains the current function start and end pointers.
                 function_range.start = function_iter.next().unwrap_or(0);
                 function_range.end = *function_iter.peek().unwrap_or(&program_range.end);
-                let end_insn = ebpf::get_insn(prog, function_range.end.saturating_sub(1));
+                let exit_insn_ptr_val = function_range.end.saturating_sub(1);
+                let end_insn = ebpf::get_insn(prog, exit_insn_ptr_val);
                 match end_insn.opc { // function_end must have a `ja` or `exit`.
                     ebpf::JA | ebpf::EXIT => {},
                     _ =>  return Err(VerifierError::InvalidFunction(
-                        function_range.end.saturating_sub(1),
+                        exit_insn_ptr_val,
                     )),
                 }
                 // Entry of the function will have a BtfType in BTF section.
@@ -88,8 +89,10 @@ impl Sema {
                 let fentry_btf_type = btf.get_btftype(&insn).unwrap();
                 // Last instruction in the function has the return type.
                 let fexit_btf_type = btf.get_btftype(&end_insn).unwrap();
-                let insn_ptr_val = insn_ptr as u32;
-                self.fn_symbol_table.insert(function_registry.map.get(&insn_ptr_val).unwrap().1.to_string(), fentry_btf_type.clone());
+                let entry_insn_ptr_val = insn_ptr as u32;
+                let exit_insn_ptr_val_u32 = exit_insn_ptr_val as u32;
+                self.fn_symbol_table.insert(function_registry.map.get(&entry_insn_ptr_val).unwrap().1.to_string(), fentry_btf_type.clone());
+                self.fn_symbol_table.insert(function_registry.map.get(&exit_insn_ptr_val_u32).unwrap().1.to_string(), fexit_btf_type.clone());
             }
         }
         Ok(())
