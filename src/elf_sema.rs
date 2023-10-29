@@ -1,21 +1,24 @@
 //! Semantic analyzer of ebpf binary with btf information.
-//! the first function_range.start is the start of function. this will have entry in btf.
 
-// the argumenet types will also have entry in btf.
-// at the end r0 will have the return value.
+// BTF provides minimal type information.
+// - The function_range.start (start of function) has entry in btf.
+// - The argument types has entry in btf.
+// - At the end r0 will have the return value.
+//
 // Other than this we have to reconstruct the type of everything else.
-// let btf_type = btf.get_btftype(&insn).unwrap();
-
 // use the `BtfTypes::resolve_type` to get type from a type_id.
-// you can assume that you'll get the type id of the function prototype of the function you're verifying
-// Look at FuncProto and BTF_KIND_FUNC_PROTO, add a function that returns type_id based on a FuncProto.
-// if you want to get it now while testing, you need to iterate over all the btf types, and look for a func proto that matches the name of the function you're verifying
+// We can assume that we'll get the type id of the function prototype
+// of the function you're verifying. Look at FuncProto and BTF_KIND_FUNC_PROTO.
+// Add a function that returns type_id based on a FuncProto.
+//
+// Btf::types() returns an  impl Iterator<Item = &BtfType>.
+// This can also be used but maybe inefficient because we'll have to iterate
+// over all types and find the matching function.
 // https://github.com/aya-rs/aya/blob/373fb7bf06ba80ee4c120d8c112f5e810204c472/aya-obj/src/btf/btf.rs#L279
-// hash<fn, type_id>
-//! let program_range = 0..prog.len() / ebpf::INSN_SIZE;
-
+//
 // key (int) -> name of the function. in BTF we can retried type from the name of the function.
 // TODO: Build a table (function name -> btf type) as line-info may not be present.
+// TODO: Build a cfg. Look at static_analysis.rs::split_into_basic_blocks
 
 use crate::{
     ebpf,
