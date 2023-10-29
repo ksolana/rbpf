@@ -19,6 +19,7 @@
 // key (int) -> name of the function. in BTF we can retried type from the name of the function.
 // TODO: Build a table (function name -> btf type) as line-info may not be present.
 // TODO: Build a cfg. Look at static_analysis.rs::split_into_basic_blocks
+// TODO: Build a def-use chain to track types.
 
 use crate::{
     ebpf,
@@ -66,15 +67,15 @@ impl Sema {
         // function_iter gets a list of all the function addresses in sorted order.
         let mut function_iter = function_registry.keys().map(|insn_ptr| insn_ptr as usize).peekable();
         let mut function_range = program_range.start..program_range.end;
-        let mut insn_ptr: usize = 0;
+        let insn_ptr: usize = 0;
         while (insn_ptr + 1) * ebpf::INSN_SIZE <= prog.len() {
             let insn = ebpf::get_insn(prog, insn_ptr);
-            let mut store = false;
 
             // An insn_ptr points to the end of a function when it has value in function_iter.
             if sbpf_version.static_syscalls() && function_iter.peek() == Some(&insn_ptr) {
                 // function_range contains the current function start and end pointers.
                 function_range.start = function_iter.next().unwrap_or(0);
+                // FIXME: Does it work when function_range.end == program_range.end?
                 function_range.end = *function_iter.peek().unwrap_or(&program_range.end);
                 let exit_insn_ptr_val = function_range.end.saturating_sub(1);
                 let end_insn = ebpf::get_insn(prog, exit_insn_ptr_val);
