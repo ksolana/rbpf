@@ -84,6 +84,9 @@ pub enum VerifierError {
     /// Invalid function
     #[error("Invalid function at instruction {0}")]
     InvalidFunction(usize),
+    /// Unknown type of the instruction insn
+    #[error("Invalid instruction {0}")]
+    UnknownBtfType(usize),
 }
 
 /// eBPF Verifier

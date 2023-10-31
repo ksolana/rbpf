@@ -57,6 +57,146 @@ impl Sema {
             insn_symbol_table
         }
     }
+
+    /// Infer type of an instruction based on its operand and available context.
+    pub fn infer_type(&mut self, insn : &ebpf::Insn, insn_ptr : usize) -> Result<BtfType, VerifierError> {
+        match insn.opc {
+            ebpf::LD_DW_IMM  => {},
+
+            // BPF_LDX class
+            ebpf::LD_B_REG   => {},
+            ebpf::LD_H_REG   => {},
+            ebpf::LD_W_REG   => {},
+            ebpf::LD_DW_REG  => {},
+
+            // BPF_ST class
+            ebpf::ST_B_IMM   => {},
+            ebpf::ST_H_IMM   => {},
+            ebpf::ST_W_IMM   => {},
+            ebpf::ST_DW_IMM  => {},
+
+            // BPF_STX class
+            ebpf::ST_B_REG   => {},
+            ebpf::ST_H_REG   => {},
+            ebpf::ST_W_REG   => {},
+            ebpf::ST_DW_REG  => {},
+
+            // BPF_ALU class
+            ebpf::ADD32_IMM  => {},
+            ebpf::ADD32_REG  => {},
+            ebpf::SUB32_IMM  => {},
+            ebpf::SUB32_REG  => {},
+            ebpf::MUL32_IMM  => {},
+            ebpf::MUL32_REG  => {},
+            ebpf::DIV32_IMM  => {},
+            ebpf::DIV32_REG  => {},
+            ebpf::OR32_IMM   => {},
+            ebpf::OR32_REG   => {},
+            ebpf::AND32_IMM  => {},
+            ebpf::AND32_REG  => {},
+            ebpf::LSH32_IMM  => {},
+            ebpf::LSH32_REG  => {},
+            ebpf::RSH32_IMM  => {},
+            ebpf::RSH32_REG  => {},
+            ebpf::NEG32      => {},
+            ebpf::MOD32_IMM  => {},
+            ebpf::MOD32_REG  => {},
+            ebpf::XOR32_IMM  => {},
+            ebpf::XOR32_REG  => {},
+            ebpf::MOV32_IMM  => {},
+            ebpf::MOV32_REG  => {},
+            ebpf::ARSH32_IMM => {},
+            ebpf::ARSH32_REG => {},
+            ebpf::LE         => {},
+            ebpf::BE         => {},
+
+            // BPF_ALU64 class
+            ebpf::ADD64_IMM  => {},
+            ebpf::ADD64_REG  => {},
+            ebpf::SUB64_IMM  => {},
+            ebpf::SUB64_REG  => {},
+            ebpf::MUL64_IMM  => {},
+            ebpf::MUL64_REG  => {},
+            ebpf::DIV64_IMM  => {},
+            ebpf::DIV64_REG  => {},
+            ebpf::OR64_IMM   => {},
+            ebpf::OR64_REG   => {},
+            ebpf::AND64_IMM  => {},
+            ebpf::AND64_REG  => {},
+            ebpf::LSH64_IMM  => {},
+            ebpf::LSH64_REG  => {},
+            ebpf::RSH64_IMM  => {},
+            ebpf::RSH64_REG  => {},
+            ebpf::NEG64      => {},
+            ebpf::MOD64_IMM  => {},
+            ebpf::MOD64_REG  => {},
+            ebpf::XOR64_IMM  => {},
+            ebpf::XOR64_REG  => {},
+            ebpf::MOV64_IMM  => {},
+            ebpf::MOV64_REG  => {},
+            ebpf::ARSH64_IMM => {},
+            ebpf::ARSH64_REG => {},
+            ebpf::HOR64_IMM  => {},
+
+            // BPF_PQR class
+            ebpf::LMUL32_IMM => {},
+            ebpf::LMUL32_REG => {},
+            ebpf::LMUL64_IMM => {},
+            ebpf::LMUL64_REG => {},
+            ebpf::UHMUL64_IMM => {},
+            ebpf::UHMUL64_REG => {},
+            ebpf::SHMUL64_IMM => {},
+            ebpf::SHMUL64_REG => {},
+            ebpf::UDIV32_IMM => {},
+            ebpf::UDIV32_REG => {},
+            ebpf::UDIV64_IMM => {},
+            ebpf::UDIV64_REG => {},
+            ebpf::UREM32_IMM => {},
+            ebpf::UREM32_REG => {},
+            ebpf::UREM64_IMM => {},
+            ebpf::UREM64_REG => {},
+            ebpf::SDIV32_IMM => {},
+            ebpf::SDIV32_REG => {},
+            ebpf::SDIV64_IMM => {},
+            ebpf::SDIV64_REG => {},
+            ebpf::SREM32_IMM => {},
+            ebpf::SREM32_REG => {},
+            ebpf::SREM64_IMM => {},
+            ebpf::SREM64_REG => {},
+
+            // BPF_JMP class
+            ebpf::JA         => {},
+            ebpf::JEQ_IMM    => {},
+            ebpf::JEQ_REG    => {},
+            ebpf::JGT_IMM    => {},
+            ebpf::JGT_REG    => {},
+            ebpf::JGE_IMM    => {},
+            ebpf::JGE_REG    => {},
+            ebpf::JLT_IMM    => {},
+            ebpf::JLT_REG    => {},
+            ebpf::JLE_IMM    => {},
+            ebpf::JLE_REG    => {},
+            ebpf::JSET_IMM   => {},
+            ebpf::JSET_REG   => {},
+            ebpf::JNE_IMM    => {},
+            ebpf::JNE_REG    => {},
+            ebpf::JSGT_IMM   => {},
+            ebpf::JSGT_REG   => {},
+            ebpf::JSGE_IMM   => {},
+            ebpf::JSGE_REG   => {},
+            ebpf::JSLT_IMM   => {},
+            ebpf::JSLT_REG   => {},
+            ebpf::JSLE_IMM   => {},
+            ebpf::JSLE_REG   => {},
+            ebpf::CALL_IMM   => {},
+            ebpf::CALL_REG   => {},
+            ebpf::EXIT       => {},
+            _                => {
+                return Err(VerifierError::UnknownOpCode(insn.opc, insn_ptr));
+            }
+        }
+        Ok(BtfType::Unknown)
+    }
     /// Build symbol table of prog.
     /// * `prog` - The SBPF program.
     /// * `sbpf_version` - Version.
@@ -95,6 +235,16 @@ impl Sema {
                 self.fn_symbol_table.insert(function_registry.map.get(&entry_insn_ptr_val).unwrap().1.to_string(), fentry_btf_type.clone());
                 self.fn_symbol_table.insert(function_registry.map.get(&exit_insn_ptr_val_u32).unwrap().1.to_string(), fexit_btf_type.clone());
             }
+            match self.infer_type(&insn, insn_ptr) {
+                Ok(ty) => {
+                    if ty == BtfType::Unknown {
+                        return Err(VerifierError::UnknownOpCode(insn.opc, insn_ptr));
+                    } else {
+                        self.insn_symbol_table.insert(insn_ptr.to_string(), ty.clone());
+                    }
+                }
+                Err(_) => return Err(VerifierError::UnknownBtfType(insn_ptr)),
+            };
         }
         Ok(())
     }
