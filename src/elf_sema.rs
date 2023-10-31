@@ -27,6 +27,7 @@ use crate::{
     program::{FunctionRegistry, SBPFVersion},
     verifier::VerifierError,
     vm::Config,
+    static_analysis::Analysis,
 };
 
 use alloc::{
@@ -50,7 +51,7 @@ pub struct Sema {
 
 impl Sema {
     ///
-    pub fn new(fn_symbol_table : HashMap<String, BtfType>,
+    pub fn clone(fn_symbol_table : HashMap<String, BtfType>,
         insn_symbol_table : HashMap<String, BtfType>) -> Self {
         Sema {
             fn_symbol_table,
@@ -201,7 +202,7 @@ impl Sema {
     /// * `prog` - The SBPF program.
     /// * `sbpf_version` - Version.
     /// * `function_registry` - List of function start and end.
-    pub fn build_symtab(&mut self, prog: &[u8], btf: Btf, sbpf_version: &SBPFVersion, function_registry: &FunctionRegistry<usize>) -> Result<(), VerifierError> {
+    pub fn build_symtab(&mut self, prog: &[u8], btf: Btf, sbpf_version: &SBPFVersion, function_registry: &FunctionRegistry<usize>, analysis: &Analysis) -> Result<(), VerifierError> {
         let program_range = 0..prog.len() / ebpf::INSN_SIZE;
         // TODO: Why iterate over keys, we should just query function_registry for the insn_ptr.
         // function_iter gets a list of all the function addresses in sorted order.

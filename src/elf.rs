@@ -24,7 +24,7 @@ use crate::{
     memory_region::MemoryRegion,
     program::{BuiltinProgram, FunctionRegistry, SBPFVersion},
     verifier::Verifier,
-    vm::{Config, ContextObject},
+    vm::{Config, ContextObject}, btf::btf::Btf,
 };
 
 #[cfg(all(feature = "jit", not(target_os = "windows"), target_arch = "x86_64"))]
@@ -294,7 +294,15 @@ impl<C: ContextObject> Executable<C> {
     /// Verify the executable
     pub fn run_type_inference(&self) -> Result<(), EbpfError> {
         use crate::elf_sema::Sema;
-        Ok(())
+        let analysis = crate::static_analysis::Analysis::from_executable(self).unwrap();
+        let mut sema : Sema = Default::default();
+        let btf : Btf = Btf::new();
+        match sema.build_symtab(self.get_text_bytes().1,
+                                btf, self.get_sbpf_version(),
+                                self.get_function_registry(), &analysis) {
+                    Ok(x) => return Ok(x),
+                    Err(e) => return Err(EbpfError::VerifierError(e))
+        }
     }
 
     /// Verify the executable
