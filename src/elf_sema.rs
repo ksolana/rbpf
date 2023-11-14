@@ -38,11 +38,13 @@ use alloc::{
     vec::Vec,
 };
 
-use std::collections::HashMap;
+use std::collections::{HashMap, BTreeMap};
 
 /// Semantic analysis of eBPF programs with attached BTF.
 #[derive(PartialEq, Eq, Clone, Default)]
 pub struct Sema {
+    /// Functions in the executable
+    pub functions: BTreeMap<usize, (u32, String)>,
     /// Function Name -> BtfType
     pub fn_symbol_table : HashMap<String, BtfType>,
     /// Insn Address -> BtfType
@@ -51,14 +53,32 @@ pub struct Sema {
 
 impl Sema {
     ///
-    pub fn clone(fn_symbol_table : HashMap<String, BtfType>,
+    pub fn clone(functions: BTreeMap<usize, (u32, String)>,
+        fn_symbol_table : HashMap<String, BtfType>,
         insn_symbol_table : HashMap<String, BtfType>) -> Self {
         Sema {
+            functions,
             fn_symbol_table,
             insn_symbol_table
         }
     }
 
+    /// Get all the functions in a binary
+    pub fn get_functions(&mut self, function_registry: &FunctionRegistry<usize>, prog_len : usize) {
+        let mut functions = BTreeMap::new();
+        for (key, (function_name, pc)) in function_registry.iter() {
+            functions.insert(
+                pc,
+                (key, String::from_utf8_lossy(function_name).to_string()),
+            );
+        }
+        debug_assert!(
+            prog_len % ebpf::INSN_SIZE == 0,
+            "eBPF program length must be a multiple of {:?} octets is {:?}",
+            ebpf::INSN_SIZE,
+            prog_len
+        );
+    }
     /// Infer type of an instruction based on its operand and available context.
     pub fn infer_type(&mut self, insn : &ebpf::Insn, insn_ptr : usize) -> Result<BtfType, VerifierError> {
         match insn.opc {

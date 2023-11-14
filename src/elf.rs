@@ -297,7 +297,9 @@ impl<C: ContextObject> Executable<C> {
         let analysis = crate::static_analysis::Analysis::from_executable(self).unwrap();
         let mut sema : Sema = Default::default();
         let btf : Btf = Btf::new();
-        match sema.build_symtab(self.get_text_bytes().1,
+        let (_program_vm_addr, program) = self.get_text_bytes();
+        sema.get_functions(self.get_function_registry(), program.len());
+        match sema.build_symtab(program,
                                 btf, self.get_sbpf_version(),
                                 self.get_function_registry(), &analysis) {
                     Ok(x) => return Ok(x),
