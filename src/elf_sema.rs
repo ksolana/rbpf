@@ -63,6 +63,15 @@ impl Sema {
         }
     }
 
+    pub fn build_cfg(bpf_function : (u32, (&[u8], usize))) {
+
+    }
+
+    pub fn build_prog_cfg(function_registry: &FunctionRegistry<usize>) {
+        for bpf_function in function_registry.iter() {
+            Self::build_cfg(bpf_function);
+        }
+    }
     /// Get all the functions in a binary
     pub fn get_functions(&mut self, function_registry: &FunctionRegistry<usize>, prog_len : usize) {
         let mut functions = BTreeMap::new();
