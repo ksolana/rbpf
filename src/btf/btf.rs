@@ -301,9 +301,9 @@ impl Btf {
         let type_id = self.type_id_by_offset(i);
         self.type_by_id(type_id)
     }
-}
 
-/*
+
+    // adityak: modified from here
     /// Adds a string to BTF metadata, returning an offset
     pub fn add_string(&mut self, name: &str) -> u32 {
         let str = name.bytes().chain(std::iter::once(0));
@@ -424,9 +424,9 @@ impl Btf {
         Ok(s.to_string_lossy())
     }
 
-    pub(crate) fn type_by_id(&self, type_id: u32) -> Result<&BtfType, BtfError> {
-        self.types.type_by_id(type_id)
-    }
+    //pub(crate) fn type_by_id(&self, type_id: u32) -> Result<&BtfType, BtfError> {
+    //    self.types.type_by_id(type_id)
+    //}
 
     pub(crate) fn resolve_type(&self, root_type_id: u32) -> Result<u32, BtfError> {
         self.types.resolve_type(root_type_id)
@@ -488,14 +488,14 @@ impl Btf {
     }
 
     /// Encodes the metadata as BTF format
-    pub fn to_bytes(&self) -> Vec<u8> {
+    /*pub fn to_bytes(&self) -> Vec<u8> {
         // Safety: btf_header is POD
         let mut buf = unsafe { bytes_of::<btf_header>(&self.header).to_vec() };
         // Skip the first type since it's always BtfType::Unknown for type_by_id to work
         buf.extend(self.types.to_bytes());
         buf.put(self.strings.as_slice());
         buf
-    }
+    }*/
 
     // This follows the same logic as libbpf's bpf_object__sanitize_btf() function.
     // https://github.com/libbpf/libbpf/blob/05f94ddbb837f5f4b3161e341eed21be307eaa04/src/libbpf.c#L2701
@@ -752,7 +752,12 @@ impl Default for Btf {
         Self::new()
     }
 }
+unsafe fn read_btf_header(data: &[u8]) -> btf_header {
+    // safety: btf_header is POD so read_unaligned is safe
+    ptr::read_unaligned(data.as_ptr() as *const btf_header)
+}
 
+/*
 impl Object {
     /// Fixes up and sanitizes BTF data.
     ///
@@ -776,11 +781,6 @@ impl Object {
             Ok(None)
         }
     }
-}
-
-unsafe fn read_btf_header(data: &[u8]) -> btf_header {
-    // safety: btf_header is POD so read_unaligned is safe
-    ptr::read_unaligned(data.as_ptr() as *const btf_header)
 }
 
 /// Data in the `.BTF.ext` section
