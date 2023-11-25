@@ -7,7 +7,7 @@ use alloc::{
 };
 use core::{ffi::CStr, mem, ptr};
 
-//use bytes::BufMut;
+use bytes::BufMut;
 use log::debug;
 //use crate::btf::generated::{btf_ext_header, btf_header};
 
@@ -488,14 +488,14 @@ impl Btf {
     }
 
     /// Encodes the metadata as BTF format
-    /*pub fn to_bytes(&self) -> Vec<u8> {
+    pub fn to_bytes(&self) -> Vec<u8> {
         // Safety: btf_header is POD
         let mut buf = unsafe { bytes_of::<btf_header>(&self.header).to_vec() };
         // Skip the first type since it's always BtfType::Unknown for type_by_id to work
         buf.extend(self.types.to_bytes());
         buf.put(self.strings.as_slice());
         buf
-    }*/
+    }
 
     // This follows the same logic as libbpf's bpf_object__sanitize_btf() function.
     // https://github.com/libbpf/libbpf/blob/05f94ddbb837f5f4b3161e341eed21be307eaa04/src/libbpf.c#L2701
