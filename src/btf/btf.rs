@@ -26,7 +26,7 @@ use crate::{
     btf::generated::{btf_ext_header, btf_header},
     btf::util::{bytes_of, HashMap},
     ebpf::Insn,
-    //Object,
+    //btf::obj::Object,
 };
 
 pub(crate) const MAX_RESOLVE_DEPTH: u8 = 32;
@@ -757,32 +757,28 @@ unsafe fn read_btf_header(data: &[u8]) -> btf_header {
     ptr::read_unaligned(data.as_ptr() as *const btf_header)
 }
 
-/*
-impl Object {
-    /// Fixes up and sanitizes BTF data.
-    ///
-    /// Mostly, it removes unsupported types and works around LLVM behaviours.
-    pub fn fixup_and_sanitize_btf(
-        &mut self,
-        features: &BtfFeatures,
-    ) -> Result<Option<&Btf>, BtfError> {
-        if let Some(ref mut obj_btf) = &mut self.btf {
-            if obj_btf.is_empty() {
-                return Ok(None);
-            }
-            // fixup btf
-            obj_btf.fixup_and_sanitize(
-                &self.section_infos,
-                &self.symbol_offset_by_name,
-                features,
-            )?;
-            Ok(Some(obj_btf))
-        } else {
-            Ok(None)
-        }
+/// Fixes up and sanitizes BTF data.
+///
+/// Mostly, it removes unsupported types and works around LLVM behaviours.
+pub fn fixup_and_sanitize_btf<'a>(
+    section_infos : &HashMap<String, (SectionIndex, u64)>,
+    symbol_offset_by_name: &HashMap<String, u64>,
+    features: &BtfFeatures,
+    obj_btf: &'a mut Btf, // Deviates from aya-obj/Object::fixup_and_sanitize_btf
+) -> Result<Option<& 'a Btf>, BtfError> {
+    if obj_btf.is_empty() {
+        return Ok(None);
     }
+    // fixup btf
+    obj_btf.fixup_and_sanitize(
+        &section_infos,
+        &symbol_offset_by_name,
+        features,
+    )?;
+    Ok(Some(obj_btf))
 }
 
+/*
 /// Data in the `.BTF.ext` section
 #[derive(Debug, Clone)]
 pub struct BtfExt {
