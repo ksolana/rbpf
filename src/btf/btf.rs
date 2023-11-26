@@ -29,6 +29,8 @@ use crate::{
     //btf::obj::Object,
 };
 
+use super::{relocation::Relocation, info::{FuncInfo, LineInfo}};
+
 pub(crate) const MAX_RESOLVE_DEPTH: u8 = 32;
 pub(crate) const MAX_SPEC_LEN: usize = 64;
 
@@ -778,7 +780,6 @@ pub fn fixup_and_sanitize_btf<'a>(
     Ok(Some(obj_btf))
 }
 
-/*
 /// Data in the `.BTF.ext` section
 #[derive(Debug, Clone)]
 pub struct BtfExt {
@@ -792,7 +793,7 @@ pub struct BtfExt {
     pub(crate) line_info: LineInfo,
     core_relo_rec_size: usize,
 }
-
+/*
 impl BtfExt {
     pub(crate) fn parse(
         data: &[u8],
