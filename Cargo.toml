@@ -20,6 +20,7 @@ include = [
 
 [dependencies]
 arbitrary = { version = "1.0", optional = true, features = ["derive"] }
+assert_matches = { version = "1.5.0", default-features = false }
 bytes = { version = "1", default-features = false }
 byteorder = "1.2"
 combine = "3.8.1"

@@ -1119,13 +1119,13 @@ pub(crate) struct SecInfo<'a> {
     num_info: u32,
     data: &'a [u8],
 }
-/*
+
 #[cfg(test)]
 mod tests {
     use assert_matches::assert_matches;
 
     use super::*;
-    use crate::btf::{
+    use crate::btf::types::{
         BtfEnum64, BtfParam, DataSec, DataSecEntry, DeclTag, Enum64, Float, Func, FuncProto, Ptr,
         TypeTag, Var,
     };
@@ -1841,4 +1841,3 @@ mod tests {
         Btf::parse(&raw, Endianness::default()).unwrap();
     }
 }
-*/
