@@ -6,6 +6,7 @@ use alloc::{
     vec::Vec,
 };
 use core::{ffi::CStr, mem, ptr};
+use std::convert::TryInto;
 
 use bytes::BufMut;
 use log::debug;
@@ -17,8 +18,8 @@ use object::{Endianness, SectionIndex};
 //use crate::std;
 
 use crate::{
+    btf::info::{FuncSecInfo, LineSecInfo},
     btf::types::{
-        //info::{FuncSecInfo, LineSecInfo},
         //relocation::Relocation,
         Array, BtfEnum, BtfKind, BtfMember, BtfType, Const, Enum, /*FuncInfo,*/ FuncLinkage, Int,
         IntEncoding, /*LineInfo,*/ Struct, Typedef, Union, VarLinkage,
@@ -793,7 +794,7 @@ pub struct BtfExt {
     pub(crate) line_info: LineInfo,
     core_relo_rec_size: usize,
 }
-/*
+
 impl BtfExt {
     pub(crate) fn parse(
         data: &[u8],
@@ -1034,7 +1035,7 @@ impl<'a> Iterator for SecInfoIter<'a> {
             data,
         })
     }
-}*/
+}
 
 /// BtfTypes allows for access and manipulation of a
 /// collection of BtfType objects
@@ -1111,14 +1112,14 @@ impl BtfTypes {
         })
     }
 }
-/*
+
 #[derive(Debug)]
 pub(crate) struct SecInfo<'a> {
     name_offset: u32,
     num_info: u32,
     data: &'a [u8],
 }
-
+/*
 #[cfg(test)]
 mod tests {
     use assert_matches::assert_matches;
