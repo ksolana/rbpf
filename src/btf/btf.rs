@@ -1639,15 +1639,18 @@ mod tests {
     fn test_int() {
         let mut btf = Btf::new();
         let name_offset = btf.add_string("int");
-        let _float_type_id = btf.add_type(BtfType::Int(Int::new(
+        let int_type_id = btf.add_type(BtfType::Int(Int::new(
                                             name_offset,
                                             4,
                                             IntEncoding::Signed,
-                                            16)));
-
+                                            16))); // FIXME @ksolana: How does offset 16 playout here?
         // Ensure we can convert to bytes and back again
         let raw = btf.to_bytes();
-        Btf::parse(&raw, Endianness::default()).unwrap();
+        let parsed_btf = Btf::parse(&raw, Endianness::default()).unwrap();
+        assert_matches!(parsed_btf.type_by_id(int_type_id).unwrap(), BtfType::Int(fixed) => {
+            assert_eq!(fixed.name_offset, 1);
+            assert_eq!(fixed.size, 4);
+        });
     }
 
     #[test]
