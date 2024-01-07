@@ -1636,6 +1636,17 @@ mod tests {
     }
 
     #[test]
+    fn test_float() {
+        let mut btf = Btf::new();
+        let name_offset = btf.add_string("float");
+        let _float_type_id = btf.add_type(BtfType::Float(Float::new(name_offset, 16)));
+
+        // Ensure we can convert to bytes and back again
+        let raw = btf.to_bytes();
+        Btf::parse(&raw, Endianness::default()).unwrap();
+    }
+
+    #[test]
     fn test_sanitize_float() {
         let mut btf = Btf::new();
         let name_offset = btf.add_string("float");
