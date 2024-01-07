@@ -1050,7 +1050,7 @@ pub const BPF_F_TIMER_ABS: _bindgen_ty_39 = 1;
 pub type _bindgen_ty_39 = ::core::ffi::c_uint;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct btf_header {
+pub struct btf_header { // https://docs.kernel.org/bpf/btf.html
     pub magic: __u16,
     pub version: __u8,
     pub flags: __u8,
