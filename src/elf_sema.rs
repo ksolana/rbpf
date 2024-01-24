@@ -20,6 +20,8 @@
 // TODO: Build a table (function name -> btf type) as line-info may not be present.
 // TODO: Build a cfg. Look at static_analysis.rs::split_into_basic_blocks
 // TODO: Build a def-use chain to track types.
+// For each block, instruction, function establish a pre-condition and post-condition.
+// The amount of checks can be tuned by flags to control runtime overhead.
 
 use crate::{
     ebpf,
