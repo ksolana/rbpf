@@ -247,6 +247,8 @@ pub struct Executable<C: ContextObject> {
     function_registry: FunctionRegistry<usize>,
     /// Loader built-in program
     loader: Arc<BuiltinProgram<C>>,
+    /// Configuration settings
+    pub config: Config,
     /// Compiled program and argument
     #[cfg(all(feature = "jit", not(target_os = "windows"), target_arch = "x86_64"))]
     compiled_program: Option<JitProgram>,
@@ -255,7 +257,7 @@ pub struct Executable<C: ContextObject> {
 impl<C: ContextObject> Executable<C> {
     /// Get the configuration settings
     pub fn get_config(&self) -> &Config {
-        self.loader.get_config()
+        &self.config
     }
 
     /// Get the executable sbpf_version
@@ -352,6 +354,7 @@ impl<C: ContextObject> Executable<C> {
             )?;
             0
         };
+        let config = loader.get_config().clone();
         Ok(Self {
             elf_bytes,
             sbpf_version,
@@ -365,6 +368,7 @@ impl<C: ContextObject> Executable<C> {
             entry_pc,
             function_registry,
             loader,
+            config,
             #[cfg(all(feature = "jit", not(target_os = "windows"), target_arch = "x86_64"))]
             compiled_program: None,
         })
@@ -487,7 +491,7 @@ impl<C: ContextObject> Executable<C> {
             }
         }
 
-        let config = loader.get_config();
+        let config = loader.get_config().clone();
         let symbol_names_section_header = if config.enable_symbol_and_section_labels {
             let (_section_header_table_range, section_header_table) =
                 Elf64::parse_section_header_table(
@@ -599,6 +603,7 @@ impl<C: ContextObject> Executable<C> {
             entry_pc,
             function_registry,
             loader,
+            config,
             #[cfg(all(feature = "jit", not(target_os = "windows"), target_arch = "x86_64"))]
             compiled_program: None,
         })
@@ -689,6 +694,7 @@ impl<C: ContextObject> Executable<C> {
             elf_bytes.as_slice(),
         )?;
 
+        let config = config.clone();
         Ok(Self {
             elf_bytes,
             sbpf_version,
@@ -698,6 +704,7 @@ impl<C: ContextObject> Executable<C> {
             entry_pc,
             function_registry,
             loader,
+            config,
             #[cfg(all(feature = "jit", not(target_os = "windows"), target_arch = "x86_64"))]
             compiled_program: None,
         })
